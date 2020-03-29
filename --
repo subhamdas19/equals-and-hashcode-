@@ -1,0 +1,262 @@
+in default implementation of Object class,hashcode() gives integer representaion of memory address of the object...
+equals() method compares the memory address of both objects...
+
+in String when it overrides,equals() compares the content of both strings and == compares the memory address of both string..
+otherwise in default implementation of Object..equals() and == are same. i.e memory address of both objects
+
+
+in custom implemenation equals() can be used to check only if one data memeber is equal or not or(all data memebers of the object basically the content)
+so lets say
+we override the hashcode() which returns id.  and equals() method compares the content of both objects
+
+import java.io.*; 
+  
+class Geek  
+{ 
+      
+    public String name; 
+    public int id; 
+          
+    Geek(String name, int id)  
+    { 
+              
+        this.name = name; 
+        this.id = id; 
+    } 
+      
+    @Override
+    public boolean equals(Object obj) 
+    { 
+          
+    // checking if both the object references are  
+    // referring to the same object. 
+    if(this == obj) 
+            return true; 
+          
+        // it checks if the argument is of the  
+        // type Geek by comparing the classes  
+        // of the passed argument and this object. 
+        // if(!(obj instanceof Geek)) return false; ---> avoid. 
+        if(obj == null || obj.getClass()!= this.getClass()) 
+            return false; 
+          
+        // type casting of the argument.  
+        Geek geek = (Geek) obj; 
+          
+        // comparing the state of argument with  
+        // the state of 'this' Object. 
+        return (geek.name == this.name && geek.id == this.id); 
+    } 
+      
+    @Override
+    public int hashCode() 
+    { 
+          
+        // We are returning the Geek_id  
+        // as a hashcode value. 
+        // we can also return some  
+        // other calculated value or may 
+        // be memory address of the  
+        // Object on which it is invoked.  
+        // it depends on how you implement  
+        // hashCode() method. 
+        return this.id; 
+    } 
+      
+} 
+  
+//Driver code 
+class GFG 
+{ 
+      
+    public static void main (String[] args) 
+    { 
+      
+        // creating the Objects of Geek class. 
+        Geek g1 = new Geek("aa", 1); 
+        Geek g2 = new Geek("aa", 1); 
+          
+        // comparing above created Objects. 
+        if(g1.hashCode() == g2.hashCode()) 
+        { 
+  
+            if(g1.equals(g2)) 
+                System.out.println("Both Objects are equal. "); 
+            else
+                System.out.println("Both Objects are not equal. "); 
+      
+        } 
+        else
+        System.out.println("Both Objects are not equal. ");  
+    }  
+} 
+
+
+here we see two objects ,both have same hashcode id i.e 1 but we need to check contents of both are equal or not...here same...
+
+
+now lets take hashmap...
+package org.arpit.java2blog;
+ 
+public class Country {
+ 
+    String name;
+    long population;
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public long getPopulation() {
+        return population;
+    }
+    public void setPopulation(long population) {
+        this.population = population;
+    }
+    
+}
+ @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Country other = (Country) obj;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        return true;
+    }
+ Lets put this Country objects in hashmap:
+Here we are going to use Country class object as key and its capital name(string) as value in HashMap.
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+ 
+package org.arpit.java2blog;
+ 
+import java.util.HashMap;
+import java.util.Iterator;
+ 
+public class HashMapEqualityCheckMain {
+ 
+    /**
+     * @author Arpit Mandliya
+     */
+    public static void main(String[] args) {
+        HashMap<Country,String> countryCapitalMap=new HashMap<Country,String>(); 
+        Country india1=new Country();
+        india1.setName("India");
+        Country india2=new Country();
+        india2.setName("India");
+ 
+        countryCapitalMap.put(india1, "Delhi");
+        countryCapitalMap.put(india2, "Delhi");
+ 
+        Iterator countryCapitalIter=countryCapitalMap.keySet().iterator();
+        while(countryCapitalIter.hasNext())
+        {
+            Country countryObj=countryCapitalIter.next();
+            String capital=countryCapitalMap.get(countryObj);
+            System.out.println("Capital of "+ countryObj.getName()+"----"+capital);
+ 
+        }
+    } 
+}
+ 
+When you run above program, you will see following output:
+1
+2
+3
+4
+ 
+Capital of India----Delhi
+Capital of India----Delhi
+ 
+Now you must be wondering even through two objects are equal why HashMap contains two key value pair instead of one.This is because First HashMap uses hashcode to find bucket for that key object, if hashcodes are same then only it checks for equals method and because hashcode for above two country objects uses default hashcode method,Both will have different memory address hence different hashcode.
+Now lets override hashcode method.Add following method to Country class
+1
+2
+3
+4
+5
+6
+7
+8
+9
+ 
+@Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
+    }
+ 
+Now run HashMapEqualityCheckMain.java again
+You will see following output:
+1
+2
+3
+ 
+Capital of India----Delhi
+ 
+So now hashcode for above two objects india1 and india2 are same, so Both will be point to same bucket,now equals method will be used to compare them which  will return true.
+This is the reason java doc says “if you override equals() method then you must override hashCode() method”
+
+
+
+
+Note:
+so in this example,,,in hashmap,when we insert an object,it calculates hashcode of the object inserted...and the finds the appropriate index(bucket) and inserts it.
+lets say in country class we have only overriden the equals() and not hashcode()
+
+in 
+
+so in hashmap,we enter two different objects with same content so two different hashcodes created for those 2 objects,so two keys u can say and size of hashmap is 2
+
+now if we override the hashcode() method somehow..eg given above based on name say...then we see both objects get inserted with same hashcode and size of hashmap is 1..
+so when we override equals() we need to override hashcode()
+and
+Note:
+If two objects are equal according to the equals(Object) method, then calling the hashCode method on each of the two objects must produce the same integer result.
+It is not required that if two objects are unequal according to the equals(java.lang.Object) method, then calling the hashCode method on each of the two objects must produce distinct integer results. However, the programmer should be aware that producing distinct integer results for unequal objects may improve the performance of hash tables.
+Key points to remember:
+If you are overriding equals method then you should override hashcode() also.
+If two objects are equal then they must have same hashcode.
+If two objects have same hashcode then they may or may not be equal
+Always use same attributes to generate equals and hashcode as in our case we have used name.
